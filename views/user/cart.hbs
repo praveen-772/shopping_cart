@@ -1,0 +1,70 @@
+<section>
+    <div class="container">
+        <table class="table mt-5">
+            <thead>
+                <tr>
+                    <th scope="col">Item</th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Quantity</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each products}}
+                <tr>
+                    <td><img src="/product-images/{{this.product._id}}.jpg" style="width: 100px;height: auto" alt="">
+                    </td>
+                    <td>{{this.product.Name}}</td>
+                    <td>Rs: {{this.product.Price}}</td>
+
+                    <td>
+                        <button class="cart-item-count mr-3"
+                            onclick="changeQuantity('{{this._id}}','{{this.product._id}}','{{../user}}',-1)">-</button>
+                        <span id="{{this.product._id}}">{{this.quantity}}</span>
+                        <button class="cart-item-count ml-3"
+                            onclick="changeQuantity('{{this._id}}','{{this.product._id}}','{{../user}}',1)">+</button>
+                    </td>
+                    <td>
+                        <a href="user/delete-product/{{this.product._id}}" class="btn btn-danger" 
+                        onclick="return confirm('Are you sure to delete {{this.Name}}')">Remove</a>
+                    </td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+        <hr>
+        <div>
+            <h3 class="float-right mr-5" style="background: lightgreen">Total-> Rs: <span id="total">{{totalValue}}</span></h3><br><br>
+            <a href="/place-order" class="float-right mr-5 btn btn-success" style="width: 25%"><b><h4> Place Order </h4></b></a>
+        </div>
+    </div>
+</section>
+
+<script>
+    function changeQuantity(cartId, proId, userId,count) {
+        let quantity = parseInt(document.getElementById(proId).innerHTML)
+        count = parseInt(count)
+
+        $.ajax({
+            url: '/change-product-quantity',
+            data: {
+                user:userId,
+                cart: cartId,
+                product: proId,
+                count: count,
+                quantity: quantity
+            },
+            method: 'post',
+            success: (response) => {
+                if (response.removeProduct) {
+                    alert("!!! Product Removed from your Cart!!! ")
+                    location.reload()
+                }
+                else {
+                    document.getElementById(proId).innerHTML = quantity + count
+                    document.getElementById('total').innerHTML = response.total
+                }
+            }
+        })
+    }
+</script>
